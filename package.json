@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --full-trace -b --exit test/index.js",
     "dev": "nodemon --trace-warnings",
-    "debug": "nodemon --inspect"
+    "debug": "nodemon --inspect",
+    "start": "nodemon app.js"
   },
   "author": "John W. Fail<john@ptarmigan.fi>",
   "license": "MIT",
