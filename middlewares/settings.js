@@ -71,7 +71,7 @@ class Setting {
               throw "Contract is undefined"
             } else {
               this.app.locals.contract = contract
-              this.app.locals.coinbase = await promisify(cb => web3.eth.getCoinbase(cb))
+              // this.app.locals.coinbase = await promisify(cb => web3.eth.getCoinbase(cb))
               next()
             }
           })

@@ -83,7 +83,7 @@ class Controllers {
     this.app.route('/mint')
       .post(async(req, res) => {
         try {
-          let txhash = await promisify(cb => this.app.locals.contract.mint(req.body.recipient, req.body.tokens, {from: this.app.locals.coinbase, gasPrice: config.gasprice}, cb))
+          let txhash = await promisify(cb => this.app.locals.contract.mint(req.body.recipient, req.body.tokens, {from: config.coinbase, gasPrice: config.gasprice}, cb))
           let dbinsert = await db.none('INSERT INTO ethtransactions (txaddress, transaction_type_id, recipient_account, value, timeof, created_at, updated_at)' +
       'VALUES(${txhash}, 1, ${recipient_account}, ${tokens}, now(), now(), now() )',  {txhash: txhash, recipient_account: req.body.recipient, tokens: req.body.tokens})
 
@@ -102,7 +102,7 @@ class Controllers {
     this.app.route('/spend')
       .post(async(req, res) =>  {
         try {
-          let txhash = await await promisify(cb => this.app.locals.contract.spend(req.body.sender, req.body.tokens, {from: this.app.locals.coinbase, gasprice: config.gasprice}, cb))
+          let txhash = await await promisify(cb => this.app.locals.contract.spend(req.body.sender, req.body.tokens, {from: config.coinbase, gasprice: config.gasprice}, cb))
           let dbinsert = await db.none('INSERT INTO ethtransactions (txaddress, transaction_type_id, source_account, value, timeof, created_at, updated_at)' +
       'VALUES(${txhash}, 2, ${sender}, ${tokens}, now(), now(), now() )',  {txhash: txhash, sender: req.body.sender, tokens: req.body.tokens});
 
@@ -164,7 +164,7 @@ class Controllers {
           } else {
             let txhash = await
             promisify(cb => this.app.locals.contract.biathlon_transfer(req.body.sender, req.body.recipient, req.body.tokens,
-              {from: this.app.locals.coinbase, gasPrice: config.gasprice}, cb))
+              {from: config.coinbase, gasPrice: config.gasprice}, cb))
             let dbinsert = db.none('INSERT INTO ethtransactions (txaddress, transaction_type_id, source_account, recipient_account, value, timeof, created_at, updated_at)' +
               'VALUES(${txhash}, 3, ${sender}, ${recipient}, ${tokens}, now(), now(), now() )', {
               txhash: txhash,
