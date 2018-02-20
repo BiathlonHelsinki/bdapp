@@ -43,7 +43,7 @@ class App {
             this.app.use(morgan('dev')); // log every request to the console
         }
         else {
-            //this.app.use(compression());
+             this.app.use(morgan('combined'))
         }
         this.app.use(bodyParser.urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
         this.app.use(bodyParser.json()); // parse application/json
