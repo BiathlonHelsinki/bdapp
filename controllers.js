@@ -84,8 +84,14 @@ class Controllers {
       .post(async(req, res) => {
         try {
           let txhash = await promisify(cb => this.app.locals.contract.mint(req.body.recipient, req.body.tokens, {from: config.coinbase, gasPrice: config.gasprice}, cb))
-          let dbinsert = await db.none('INSERT INTO ethtransactions (txaddress, transaction_type_id, recipient_account, value, timeof, created_at, updated_at)' +
-      'VALUES(${txhash}, 1, ${recipient_account}, ${tokens}, now(), now(), now() )',  {txhash: txhash, recipient_account: req.body.recipient, tokens: req.body.tokens})
+          let dbinsert = await db.one('INSERT INTO ethtransactions (txaddress, transaction_type_id, recipient_account, value, timeof, created_at, updated_at)' +
+      'VALUES(${txhash}, 1, ${recipient_account}, ${tokens}, now(), now(), now() )  RETURNING id',  {txhash: txhash, recipient_account: req.body.recipient, tokens: req.body.tokens})
+          .then(async(data) => {
+            if (req.body.blockchainid) {
+              const q1 = await db.none('UPDATE blockchain_transactions SET ethtransaction_id = $1 WHERE id = $2', [ data.id, req.body.blockchainid])
+
+            }
+          })
 
           res.status(200).json({"success": txhash})
         } catch (error) {
@@ -102,9 +108,14 @@ class Controllers {
     this.app.route('/spend')
       .post(async(req, res) =>  {
         try {
-          let txhash = await await promisify(cb => this.app.locals.contract.spend(req.body.sender, req.body.tokens, {from: config.coinbase, gasprice: config.gasprice}, cb))
-          let dbinsert = await db.none('INSERT INTO ethtransactions (txaddress, transaction_type_id, source_account, value, timeof, created_at, updated_at)' +
-      'VALUES(${txhash}, 2, ${sender}, ${tokens}, now(), now(), now() )',  {txhash: txhash, sender: req.body.sender, tokens: req.body.tokens});
+          let txhash = await await promisify(cb => this.app.locals.contract.spend(req.body.sender, req.body.tokens, {from: config.coinbase, gasPrice: config.gasprice}, cb))
+          let dbinsert = await db.one('INSERT INTO ethtransactions (txaddress, transaction_type_id, source_account, value, timeof, created_at, updated_at)' +
+      'VALUES(${txhash}, 2, ${sender}, ${tokens}, now(), now(), now() )  RETURNING id',  {txhash: txhash, sender: req.body.sender, tokens: req.body.tokens})
+          .then(async(data) => {
+            if (req.body.blockchainid) {
+              let dblink = await db.none('UPDATE blockchain_transactions SET ethtransaction_id = $1 WHERE id = $2', [data.id, req.body.blockchainid])
+            }
+          });
 
           res.status(200).json({"success": txhash})
         } catch (error) {
